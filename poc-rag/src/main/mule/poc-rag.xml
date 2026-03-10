@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ms-aichain="http://www.mulesoft.org/schema/mule/ms-aichain"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+        http://www.mulesoft.org/schema/mule/ms-aichain http://www.mulesoft.org/schema/mule/ms-aichain/current/mule-ms-aichain.xsd">
+
+    <configuration-properties file="application.yaml"/>
+
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+        <http:listener-connection host="${http.host}" port="${http.port}"/>
+    </http:listener-config>
+
+    <ms-aichain:config
+            name="MAC_Config"
+            doc:name="MuleSoft AI Chain Config"
+            llmType="OLLAMA"
+            configType="Configuration Json"
+            filePath='#[mule.home ++ "/apps/" ++ app.name ++ "/llm-config.json"]'
+            modelName="llama3"
+            temperature="0.2"
+            llmTimeout="120"
+            llmTimeoutUnit="SECONDS"
+            maxTokens="800"/>
+
+    <!-- Inicializa el store e ingiere el TXT -->
+    <flow name="post-rag-init-flow">
+        <http:listener doc:name="POST /rag/init"
+                       config-ref="HTTP_Listener_config"
+                       path="/rag/init"
+                       allowedMethods="POST"/>
+
+        <logger level="INFO"
+                doc:name="Log init start"
+                message='#[ "Inicializando store RAG con txtpruebas.txt" ]'/>
+
+        <ms-aichain:embedding-new-store
+                doc:name="Embedding new store"
+                storeName='#[mule.home ++ "/apps/" ++ app.name ++ "/knowledge.store"]'
+                target="storeCreateResult"/>
+
+        <ms-aichain:embedding-add-document-to-store
+                doc:name="Embedding add document to store"
+                storeName='#[mule.home ++ "/apps/" ++ app.name ++ "/knowledge.store"]'
+                contextPath='#[mule.home ++ "/apps/" ++ app.name ++ "/docs/txtpruebas.txt"]'
+                maxSegmentSizeInChars="1000"
+                maxOverlapSizeInChars="150"
+                fileType="text"
+                target="storeLoadResult"/>
+
+        <ee:transform doc:name="Respuesta init">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: true,
+  message: "Store creado e ingestado correctamente",
+  storePath: mule.home ++ "/apps/" ++ app.name ++ "/knowledge.store",
+  documentPath: mule.home ++ "/apps/" ++ app.name ++ "/docs/txtpruebas.txt",
+  createResult: vars.storeCreateResult,
+  loadResult: vars.storeLoadResult
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <error-handler>
+            <on-error-continue logException="true" doc:name="Manejar error init">
+                <ee:transform doc:name="Error init JSON">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: false,
+  step: "init",
+  errorType: error.errorType.identifier default "UNKNOWN",
+  description: error.description default "Error inicializando el store",
+  detailedDescription: error.detailedDescription default null
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-continue>
+        </error-handler>
+    </flow>
+
+    <!-- Pregunta por GET para navegador -->
+    <flow name="get-rag-ask-flow">
+        <http:listener doc:name="GET /rag/ask"
+                       config-ref="HTTP_Listener_config"
+                       path="/rag/ask"
+                       allowedMethods="GET"/>
+
+        <ee:transform doc:name="Normalizar query">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  question: attributes.queryParams.question default p("rag.defaultQuestion")
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <set-variable variableName="originalQuestion"
+                      value="#[payload.question]"
+                      doc:name="Guardar pregunta original"/>
+
+        <ms-aichain:embedding-get-info-from-store
+                doc:name="Embedding get info from store GET"
+                config-ref="MAC_Config"
+                storeName='#[mule.home ++ "/apps/" ++ app.name ++ "/knowledge.store"]'
+                getLatest="true"
+                target="ragAnswer">
+            <ms-aichain:data><![CDATA[#[payload.question]]]></ms-aichain:data>
+        </ms-aichain:embedding-get-info-from-store>
+
+        <ee:transform doc:name="Formatear respuesta GET">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: true,
+  question: vars.originalQuestion,
+  answer: vars.ragAnswer.response default null,
+  sources: vars.ragAnswer.sources default [],
+  rawPayload: vars.ragAnswer
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <error-handler>
+            <on-error-continue logException="true" doc:name="Manejar error GET">
+                <ee:transform doc:name="Error GET JSON">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: false,
+  step: "ask-get",
+  errorType: error.errorType.identifier default "UNKNOWN",
+  description: error.description default "Error consultando el store por GET",
+  detailedDescription: error.detailedDescription default null
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-continue>
+        </error-handler>
+    </flow>
+
+    <!-- Pregunta por POST para Postman/curl -->
+    <flow name="post-rag-ask-flow">
+        <http:listener doc:name="POST /rag/ask"
+                       config-ref="HTTP_Listener_config"
+                       path="/rag/ask"
+                       allowedMethods="POST"/>
+
+        <ee:transform doc:name="Normalizar body">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var bodyReq = payload default {}
+---
+{
+  question: bodyReq.question default p("rag.defaultQuestion")
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <set-variable variableName="originalQuestion"
+                      value="#[payload.question]"
+                      doc:name="Guardar pregunta original"/>
+
+        <ms-aichain:embedding-get-info-from-store
+                doc:name="Embedding get info from store POST"
+                config-ref="MAC_Config"
+                storeName='#[mule.home ++ "/apps/" ++ app.name ++ "/knowledge.store"]'
+                getLatest="true"
+                target="ragAnswer">
+            <ms-aichain:data><![CDATA[#[payload.question]]]></ms-aichain:data>
+        </ms-aichain:embedding-get-info-from-store>
+
+        <ee:transform doc:name="Formatear respuesta POST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: true,
+  question: vars.originalQuestion,
+  answer: vars.ragAnswer.response default null,
+  sources: vars.ragAnswer.sources default [],
+  rawPayload: vars.ragAnswer
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <error-handler>
+            <on-error-continue logException="true" doc:name="Manejar error POST">
+                <ee:transform doc:name="Error POST JSON">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: false,
+  step: "ask-post",
+  errorType: error.errorType.identifier default "UNKNOWN",
+  description: error.description default "Error consultando el store por POST",
+  detailedDescription: error.detailedDescription default null
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-continue>
+        </error-handler>
+    </flow>
+
+</mule>
