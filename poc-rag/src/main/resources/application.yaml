@@ -4,3 +4,4 @@ http:
 
 rag:
   defaultQuestion: "Hazme un resumen del documento"
+  txtPath: "docs/txtpruebas.txt"

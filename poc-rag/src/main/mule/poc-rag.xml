@@ -39,7 +39,7 @@
 
         <logger level="INFO"
                 doc:name="Log init start"
-                message='#[ "Inicializando store RAG con txtpruebas.txt" ]'/>
+                message='#["Inicializando store RAG con txtpruebas.txt"]'/>
 
         <ms-aichain:embedding-new-store
                 doc:name="Embedding new store"
@@ -54,7 +54,6 @@
                 maxOverlapSizeInChars="150"
                 fileType="text"
                 target="storeLoadResult"/>
-
         <ee:transform doc:name="Respuesta init">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -63,8 +62,6 @@ output application/json
 {
   ok: true,
   message: "Store creado e ingestado correctamente",
-  storePath: mule.home ++ "/apps/" ++ app.name ++ "/knowledge.store",
-  documentPath: mule.home ++ "/apps/" ++ app.name ++ "/docs/txtpruebas.txt",
   createResult: vars.storeCreateResult,
   loadResult: vars.storeLoadResult
 }]]></ee:set-payload>
