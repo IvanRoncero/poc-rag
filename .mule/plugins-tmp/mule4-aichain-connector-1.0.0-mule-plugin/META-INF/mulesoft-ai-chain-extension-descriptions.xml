@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension-documentation>
+    <configs>
+        <config name="config">
+            <description><![CDATA[This class represents an extension configuration, values set in this class are commonly used across multiple operations since they represent something core from the extension.]]></description>
+            <parameters>
+                <parameter name="llmType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="configType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="filePath">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="modelName">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="temperature">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="llmTimeout">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="llmTimeoutUnit">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="maxTokens">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="name">
+                    <description><![CDATA[The identifier of this element used to reference it in other components]]></description>
+                </parameter>
+                <parameter name="expirationPolicy">
+                    <description><![CDATA[Configures the minimum amount of time that a dynamic configuration instance can remain idle before the runtime considers it eligible for expiration. This does not mean that the platform will expire the instance at the exact moment that it becomes eligible. The runtime will actually purge the instances when it sees it fit.]]></description>
+                </parameter>
+            </parameters>
+        </config>
+    </configs>
+    <connections/>
+    <extension name="MuleSoft AI Chain">
+        <description><![CDATA[This is the main class of an extension, is the entry point from which configurations, connection providers, operations and sources are going to be declared.]]></description>
+        <parameters/>
+    </extension>
+    <operations>
+        <operation name="AGENT-define-prompt-template">
+            <description><![CDATA[Helps in defining an AI Agent configured with a prompt template]]></description>
+            <parameters>
+                <parameter name="dataset">
+                    <description><![CDATA[Refers to the user query to be acted upon]]></description>
+                </parameter>
+                <parameter name="template">
+                    <description><![CDATA[Refers to sample template used by LLM to respond adequately to the user queries]]></description>
+                </parameter>
+                <parameter name="instructions">
+                    <description><![CDATA[This provides the LLM on how to understand and respond to the user queries]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="CHAT-answer-prompt">
+            <description><![CDATA[Implements a simple Chat agent to enable chat with the LLM]]></description>
+            <parameters>
+                <parameter name="prompt">
+                    <description><![CDATA[User defined prompt query]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="CHAT-answer-prompt-with-memory">
+            <description><![CDATA[Implements a chat memory for a defined LLM as an AI Agent. The memoryName allows the multichannel / profile design.]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt]]></description>
+                </parameter>
+                <parameter name="memoryName">
+                    <description><![CDATA[Name of the memory to be fetched for further processing by the LLMs]]></description>
+                </parameter>
+                <parameter name="dbFilePath">
+                    <description><![CDATA[Location of the file containing the memory]]></description>
+                </parameter>
+                <parameter name="maxMessages">
+                    <description><![CDATA[Max messages to be analyzed for that memory.]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-get-info-from-store">
+            <description><![CDATA[Reads information via prompt from embedding store (in-Memory), which is imported from the storeName (full path)]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt or query]]></description>
+                </parameter>
+                <parameter name="storeName">
+                    <description><![CDATA[Name of the store to be queried]]></description>
+                </parameter>
+                <parameter name="getLatest">
+                    <description><![CDATA[Determines whether the store needs to be freshly fetched from the location]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-get-info-from-store-legacy">
+            <description><![CDATA[Reads information via prompt from embedding store (in-Memory), which is imported from the storeName (full path)]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt or query]]></description>
+                </parameter>
+                <parameter name="storeName">
+                    <description><![CDATA[Name of the store to be queried]]></description>
+                </parameter>
+                <parameter name="getLatest">
+                    <description><![CDATA[Determines whether the store needs to be freshly fetched from the location]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="IMAGE-generate">
+            <description><![CDATA[Generates an image based on the prompt in data]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="IMAGE-read">
+            <description><![CDATA[Reads an image from a URL and provides the responses for the user prompts.]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt]]></description>
+                </parameter>
+                <parameter name="contextURL">
+                    <description><![CDATA[Refers to the image URL to be analyzed]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="IMAGE-read-scanned-documents">
+            <description><![CDATA[Reads scanned documents and converts to response as prompted by the user.]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt]]></description>
+                </parameter>
+                <parameter name="filePath">
+                    <description><![CDATA[Path to the file to be analyzed]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="RAG-load-document">
+            <description><![CDATA[Enables the user to query the doc provided in natural language. The doc will be embedded into in memory vector store.]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Defines the query input provided by the user]]></description>
+                </parameter>
+                <parameter name="contextPath">
+                    <description><![CDATA[Defines the file path which will be embedded]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="fileType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="SENTIMENT-analyze">
+            <description><![CDATA[Analyzes the sentiment of the user data.]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user input which needs to be analyzed]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="TOOLS-use-ai-service">
+            <description><![CDATA[(AI Services) Usage of tools by a defined AI Agent. Provide a list of tools (APIs) with all required information (endpoint, headers, body, method, etc.) to the AI Agent to use it on purpose.]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt or query]]></description>
+                </parameter>
+                <parameter name="toolConfig">
+                    <description><![CDATA[Contains the configuration required by the LLM to enable calling tools]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="TOOLS-use-ai-service-legacy">
+            <description><![CDATA[(Legacy) Usage of tools by a defined AI Agent. Provide a list of tools (APIs) with all required information (endpoint, headers, body, method, etc.) to the AI Agent to use it on purpose.]]></description>
+            <parameters>
+                <parameter name="data">
+                    <description><![CDATA[Refers to the user prompt or query]]></description>
+                </parameter>
+                <parameter name="toolConfig">
+                    <description><![CDATA[Contains the configuration required by the LLM to enable calling tools]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="config-ref">
+                    <description><![CDATA[The name of the configuration to be used to execute this component]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-add-document-to-store">
+            <description><![CDATA[Add document of type text, any and url to embedding store (in-memory), which is exported to the defined storeName (full path)]]></description>
+            <parameters>
+                <parameter name="storeName">
+                    <description><![CDATA[Name of the embedding store]]></description>
+                </parameter>
+                <parameter name="contextPath">
+                    <description><![CDATA[Refers to the location of the file to be processed]]></description>
+                </parameter>
+                <parameter name="maxSegmentSizeInChars">
+                    <description><![CDATA[Max allowed size of continuous sequence of characters while embedding]]></description>
+                </parameter>
+                <parameter name="maxOverlapSizeInChars">
+                    <description><![CDATA[Max size of overlapping characters allowed while embedding]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="fileType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-add-folder-to-store">
+            <description><![CDATA[Add document of type text, any and url to embedding store (in-memory), which is exported to the defined storeName (full path)]]></description>
+            <parameters>
+                <parameter name="storeName">
+                    <description><![CDATA[Name of the embedding store]]></description>
+                </parameter>
+                <parameter name="contextPath">
+                    <description><![CDATA[Refers to the location of the folder to be processed]]></description>
+                </parameter>
+                <parameter name="maxSegmentSizeInChars">
+                    <description><![CDATA[Max allowed size of continuous sequence of characters while embedding]]></description>
+                </parameter>
+                <parameter name="maxOverlapSizeInChars">
+                    <description><![CDATA[Max size of overlapping characters allowed while embedding]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="fileType">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-new-store">
+            <description><![CDATA[Create a new embedding store (in-memory), which is exported to the defined storeName (full path)]]></description>
+            <parameters>
+                <parameter name="storeName">
+                    <description><![CDATA[Name of the embedding store]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="EMBEDDING-query-from-store">
+            <description><![CDATA[Query information from embedding store (in-Memory), which is imported from the storeName (full path)]]></description>
+            <parameters>
+                <parameter name="storeName">
+                    <description><![CDATA[Name of the embedding store]]></description>
+                </parameter>
+                <parameter name="question">
+                    <description><![CDATA[Refers to the user prompt or query]]></description>
+                </parameter>
+                <parameter name="maxResults">
+                    <description><![CDATA[Max results to be retrieved from the store]]></description>
+                </parameter>
+                <parameter name="minScore">
+                    <description><![CDATA[Filters the response with this minScore]]></description>
+                </parameter>
+                <parameter name="getLatest">
+                    <description><![CDATA[Determines whether the store needs to be freshly fetched from the location]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+    </operations>
+    <sources/>
+    <types>
+        <type name="org.mule.extension.mulechain.api.metadata.LLMResponseAttributes">
+            <description><![CDATA[]]></description>
+            <parameters>
+                <parameter name="additionalAttributes">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="tokenUsage">
+                    <description><![CDATA[]]></description>
+                </parameter>
+            </parameters>
+        </type>
+        <type name="org.mule.extension.mulechain.api.metadata.ScannedDocResponseAttributes">
+            <description><![CDATA[]]></description>
+            <parameters>
+                <parameter name="additionalAttributes">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="scannedDocAttributes">
+                    <description><![CDATA[]]></description>
+                </parameter>
+            </parameters>
+        </type>
+    </types>
+</extension-documentation>

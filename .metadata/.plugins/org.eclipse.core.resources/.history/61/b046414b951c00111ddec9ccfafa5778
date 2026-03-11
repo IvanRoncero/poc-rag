@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ms-aichain="http://www.mulesoft.org/schema/mule/ms-aichain"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+        http://www.mulesoft.org/schema/mule/ms-aichain http://www.mulesoft.org/schema/mule/ms-aichain/current/mule-ms-aichain.xsd">
+
+    <configuration-properties file="application.yaml"/>
+
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+        <http:listener-connection host="${http.host}" port="${http.port}"/>
+    </http:listener-config>
+
+    <!--
+      Configuración AI Chain con Ollama.
+      MuleSoft documenta que para Ollama puedes usar Config Type = Configuration JSON
+      y un fichero con OLLAMA_BASE_URL.
+    -->
+    <ms-aichain:config
+        name="MAC_Config"
+        llmType="OLLAMA"
+        configType="Configuration Json"
+        filePath='#[mule.home ++ "/apps/" ++ app.name ++ "/llm-config.json"]'
+        modelName="llama3"
+        temperature="0.2"
+        llmTimeout="120"
+        llmTimeoutUnit="SECONDS"
+        maxTokens="800" />
+
+    <!-- GET /rag/ask?question=... -->
+    <flow name="get-rag-ask-flow">
+        <http:listener doc:name="GET /rag/ask" config-ref="HTTP_Listener_config" path="/rag/ask" allowedMethods="GET"/>
+
+        <ee:transform doc:name="Normalizar pregunta">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  question: attributes.queryParams.question default p("rag.defaultQuestion")
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <ms-aichain:rag-load-document
+    		doc:name="RAG load document"
+    		config-ref="MAC_Config"
+    		data="#[payload.question]"
+    		contextPath="#[p('rag.pdfPath')]"
+    		fileType="text" />
+		<ee:transform doc:name="Formatear respuesta">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: true,
+  question: vars.originalQuestion,
+  answer: payload.response default payload,
+  tokenUsage: attributes.tokenUsage default null
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <error-handler>
+            <on-error-continue logException="true" doc:name="Manejar error">
+                <ee:transform doc:name="Error JSON">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: false,
+  errorType: error.errorType.identifier default "UNKNOWN",
+  description: error.description default "Error ejecutando la PoC RAG",
+  detailedDescription: error.detailedDescription default null
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <set-variable variableName="httpStatus" value="500"/>
+            </on-error-continue>
+        </error-handler>
+    </flow>
+
+    <!-- POST /rag/ask  body: { "question": "..." } -->
+    <flow name="post-rag-ask-flow">
+        <http:listener doc:name="POST /rag/ask" config-ref="HTTP_Listener_config" path="/rag/ask" allowedMethods="POST"/>
+
+        <ee:transform doc:name="Normalizar body">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var bodyReq = payload default {}
+---
+{
+  question: bodyReq.question default p("rag.defaultQuestion")
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <set-variable variableName="originalQuestion" value="#[payload.question]" />
+
+        <ms-aichain:rag-load-document
+            doc:name="RAG load document"
+            config-ref="MAC_Config"
+            data="#[payload.question]"
+            contextPath="#[p('rag.pdfPath')]" />
+		<ee:transform doc:name="Formatear respuesta">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var raw = payload
+---
+{
+  ok: true,
+  question: vars.originalQuestion,
+  answer: raw.response default raw,
+  tokenUsage: attributes.tokenUsage default null
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <error-handler>
+            <on-error-continue logException="true" doc:name="Manejar error">
+                <ee:transform doc:name="Error JSON">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ok: false,
+  errorType: error.errorType.identifier default "UNKNOWN",
+  description: error.description default "Error ejecutando la PoC RAG",
+  detailedDescription: error.detailedDescription default null
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-continue>
+        </error-handler>
+    </flow>
+
+</mule>
