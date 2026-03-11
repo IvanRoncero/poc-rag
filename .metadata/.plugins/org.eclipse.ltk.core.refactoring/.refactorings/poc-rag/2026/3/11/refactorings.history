@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move package &apos;docs&apos; to &apos;poc-rag/src/main/resources/api&apos;&#x0D;&#x0A;- Original project: &apos;poc-rag&apos;&#x0D;&#x0A;- Destination element: &apos;poc-rag/src/main/resources/api&apos;&#x0D;&#x0A;- Original element: &apos;poc-rag/src/test/resources/docs&apos;&#x0D;&#x0A;- Update references to refactored element" description="Move package" destination="/src\/main\/resources&lt;api" element1="/src\/test\/resources&lt;docs" flags="589830" fragments="1" id="org.eclipse.jdt.ui.move" policy="org.eclipse.jdt.ui.movePackages" stamp="1773156916981" version="1.0"/>
+</session>

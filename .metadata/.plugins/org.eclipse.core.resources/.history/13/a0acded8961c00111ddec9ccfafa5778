@@ -1,0 +1,7 @@
+http:
+  host: "0.0.0.0"
+  port: "8081"
+
+rag:
+  pdfPath: "#[mule.home ++ \"/apps/\" ++ app.name ++ \"/docs/mi-documento.pdf\"]"
+  defaultQuestion: "Resume el contenido principal del documento"
