@@ -219,12 +219,6 @@ curl -X POST http://localhost:8081/rag/ask \
 
 ---
 
-## 10) Resumen rápido (checklist)
-
-1. Instalar Java 17 + Maven + Anypoint Studio + Ollama.
-2. `ollama pull llama3`.
-3. Configurar credenciales Maven (si aplica).
-4. Importar `poc-rag/` en Studio y ejecutar.
 5. Probar `POST /rag/init`.
 6. Probar `GET/POST /rag/ask`.
 
